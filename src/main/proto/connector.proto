@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package grpc;
+
+service Connector {
+  rpc triggers(TriggersRequest) returns (TriggersResponse);       // used by Workflows to get triggers defined by the Connector. Run when a user registers or refreshes a Connector.
+  rpc perform_trigger(TriggerRequest) returns (TriggerResponse);  // used by Workflows to check for trigger events. Polled periodically.
+  rpc actions(ActionsRequest) returns (ActionsResponse);          // used by Workflows to get get actions defined by the Connector. Run when a user registers or refreshes a Connector.
+  rpc perform_action(ActionRequest) returns (ActionResponse);     // used by Workflows to perform an action defined by the Connector. Run when a Workflow containing the defined action is run.
+}
+
+message Action {
+  string display_name = 1;
+  string description = 2;
+  repeated Field inputs = 3;
+  repeated Field outputs = 4;
+}
+
+message ActionRequest {
+  Action action = 1;
+  map<string,string> params = 2;
+}
+
+message ActionResponse {
+  enum Status {
+    SUCCESS = 0;
+    ERROR = 1;
+    HALT = 2;
+  };
+  Status status = 1;
+  map<string,string> outputs = 2;
+}
+
+message Trigger {
+  string display_name = 1;
+  string type = 2;
+  string app_key = 3;
+  repeated Field outputs = 4;
+  string description = 5;
+}
+
+message TriggerRequest {
+  Trigger trigger = 1;
+  map<string,string> params = 2;
+}
+
+message TriggerResponse {
+  enum Status {
+    SUCCESS = 0;
+    ERROR = 1;
+  };
+  Status status = 1;
+  string error_message = 2;
+  repeated Event events = 3;
+}
+
+message ActionsRequest {
+
+}
+
+message ActionsResponse {
+  repeated Action actions = 1;
+}
+
+message TriggersRequest {
+
+}
+
+message TriggersResponse {
+  repeated Trigger triggers = 1;
+}
+
+message Field {
+  string display_name = 1;
+  string key = 2;
+  string type = 3;
+  string app_key = 6;
+  string description = 4;
+  bool required = 5;
+}
+
+message Event {
+  string payload = 1;
+}
